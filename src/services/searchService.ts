@@ -224,6 +224,7 @@ export async function runSearch(app: AppContext, req: SearchRequest, opts: { sig
     remoteOnly: req.remoteOnly,
     includeUndated,
     excludeRepostAggregators: config.excludeRepostAggregators,
+    excludeIndeed: config.excludeIndeed,
     now,
     sourceName,
   };
@@ -294,10 +295,10 @@ export async function runSearch(app: AppContext, req: SearchRequest, opts: { sig
 
   // ------------------------------------------------------------ link validation (optional)
   const linkHttp = new SourceHttp(app.http);
-  await validateLinks(normalized, { mode: config.validateUrls, max: config.maxUrlValidations, http: linkHttp, log: logger.child('Links'), signal });
+  await validateLinks(normalized, { mode: config.validateUrls, max: config.maxUrlValidations, http: linkHttp, log: logger.child('Links'), signal, excludeIndeed: config.excludeIndeed });
 
   // ------------------------------------------------------------ strict final filter
-  const finalParams = { hoursOld, remoteOnly: req.remoteOnly, includeUndated };
+  const finalParams = { hoursOld, remoteOnly: req.remoteOnly, includeUndated, excludeIndeed: config.excludeIndeed };
   for (const job of normalized) {
     if (job.rejection) continue;
     const verdict = isValidFinalJob(job, finalParams);
@@ -312,16 +313,21 @@ export async function runSearch(app: AppContext, req: SearchRequest, opts: { sig
 
   // Per-source counts.
   const byId = new Map(states.map((s) => [s.id, s]));
+  const acceptedViaIndeed = new Map<SourceId, number>();
   for (const j of normalized) {
     const s = byId.get(j.source_id)!;
     if (j.rejection) s.report.rejected[j.rejection.code] = (s.report.rejected[j.rejection.code] ?? 0) + 1;
-    else s.report.accepted++;
+    else {
+      s.report.accepted++;
+      if (j.via_indeed) acceptedViaIndeed.set(s.id, (acceptedViaIndeed.get(s.id) ?? 0) + 1);
+    }
   }
   for (const s of states) {
     if (s.report.unique > 0) {
       const rj = s.report.rejected;
+      const indeedPart = config.excludeIndeed ? `rejected_indeed=${rj.indeed ?? 0}` : `accepted_via_indeed=${acceptedViaIndeed.get(s.id) ?? 0}`;
       s.ctx.log.info(
-        `accepted=${s.report.accepted} rejected_irrelevant=${rj.irrelevant ?? 0} rejected_non_us=${rj.non_us ?? 0} rejected_non_remote=${rj.not_remote ?? 0} rejected_old=${rj.too_old ?? 0} rejected_other=${(rj.indeed ?? 0) + (rj.invalid ?? 0) + (rj.low_quality ?? 0)}`,
+        `accepted=${s.report.accepted} ${indeedPart} rejected_irrelevant=${rj.irrelevant ?? 0} rejected_non_us=${rj.non_us ?? 0} rejected_non_remote=${rj.not_remote ?? 0} rejected_old=${rj.too_old ?? 0} rejected_other=${(rj.invalid ?? 0) + (rj.low_quality ?? 0)}`,
       );
     }
   }
@@ -357,6 +363,7 @@ export async function runSearch(app: AppContext, req: SearchRequest, opts: { sig
     removed_too_old: count('too_old'),
     removed_duplicates: duplicates.length,
     final_unique_jobs: jobs.length,
+    indeed_jobs: jobs.filter((j) => j.via_indeed).length,
   };
 
   if (persist) {

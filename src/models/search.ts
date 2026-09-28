@@ -51,6 +51,8 @@ export interface RunMetrics {
   removed_too_old: number;
   removed_duplicates: number;
   final_unique_jobs: number;
+  /** Final jobs whose listing or application goes through Indeed. */
+  indeed_jobs: number;
 }
 
 export interface SearchSummary {

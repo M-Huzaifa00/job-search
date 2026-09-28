@@ -38,6 +38,17 @@ describe('end-to-end classification of a single listing', () => {
     assert.equal(normalize(rawJob({ originSite: 'Indeed' })).rejection?.code, 'indeed');
   });
 
+  it('keeps Indeed-routed listings when excludeIndeed is off', () => {
+    const opts = { excludeIndeed: false };
+    assert.equal(normalize(rawJob({ viaIndeed: true }), opts).rejection, null);
+    assert.equal(normalize(rawJob({ originSite: 'Indeed' }), opts).rejection, null);
+    const job = normalize(rawJob({ applyUrl: 'https://www.indeed.com/viewjob?jk=123' }), opts);
+    assert.equal(job.rejection, null);
+    assert.equal(job.apply_url, 'https://www.indeed.com/viewjob?jk=123');
+    assert.equal(job.via_indeed, true);
+    assert.equal(normalize(rawJob(), opts).via_indeed, false);
+  });
+
   it('rejects jobs older than the requested window but keeps them for a wider window', () => {
     const raw = rawJob({ postedAt: hoursAgo(30) });
     assert.equal(normalize(raw).rejection?.code, 'too_old');
@@ -95,5 +106,10 @@ describe('strict final filter', () => {
     assert.equal(isValidFinalJob({ ...base, age_hours: 50 }, FINAL).ok, false);
     assert.equal(isValidFinalJob({ ...base, us_eligible: false }, FINAL).ok, false);
     assert.equal(isValidFinalJob({ ...base, matched_keywords: [] }, FINAL).ok, false);
+  });
+
+  it('allows Indeed URLs when excludeIndeed is off', () => {
+    const job = { ...normalize(rawJob()), apply_url: 'https://www.indeed.com/viewjob?jk=1' };
+    assert.equal(isValidFinalJob(job, { ...FINAL, excludeIndeed: false }).ok, true);
   });
 });

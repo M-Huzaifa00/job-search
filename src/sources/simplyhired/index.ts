@@ -15,7 +15,8 @@ function daysFilter(hoursOld: number): string {
 export const simplyhired: SourceAdapter = {
   meta: {
     id: 'simplyhired',
-    name: 'SimplyHired',
+    // Named so logs and the CSV `source` column show these are Indeed's listings.
+    name: 'SimplyHired (Indeed)',
     method: 'http-html',
     methodDetail: 'Server-rendered Next.js data (__NEXT_DATA__) on search and job pages',
     status: 'restricted',
@@ -23,7 +24,7 @@ export const simplyhired: SourceAdapter = {
     defaultEnabled: true,
     homepage: 'https://www.simplyhired.com',
     notes:
-      'SimplyHired states it "is part of the Indeed Site" and its listings come from Indeed\'s index (records carry dateOnIndeed / indeedApply). Because Indeed must be excluded, this source only runs when ALLOW_INDEED_NETWORK_SOURCES=true, and even then every listing that applies through Indeed is rejected.',
+      'SimplyHired states it "is part of the Indeed Site" and its listings come from Indeed\'s index (records carry dateOnIndeed / indeedApply). It only runs when ALLOW_INDEED_NETWORK_SOURCES=true, and listings that apply through Indeed are rejected unless EXCLUDE_INDEED=false.',
     requirement: 'Set ALLOW_INDEED_NETWORK_SOURCES=true to opt in.',
     hostPolicies: { 'www.simplyhired.com': { concurrency: 1, minIntervalMs: 1_500, jitterMs: 800 } },
     concurrency: 1,

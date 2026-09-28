@@ -76,7 +76,7 @@ export function parseSearchRequest(input: unknown, config: AppConfig): SearchReq
       if (!id) unknown.push(s);
       else if (!sources.includes(id)) sources.push(id);
     }
-    if (b.sources.some((v) => /indeed/i.test(v))) throw new ValidationError(['sources: Indeed is excluded from this aggregator']);
+    if (config.excludeIndeed && b.sources.some((v) => /indeed/i.test(v))) throw new ValidationError(['sources: Indeed is excluded from this aggregator (EXCLUDE_INDEED=true)']);
     if (unknown.length) throw new ValidationError([`sources: unknown source(s): ${unknown.join(', ')}`]);
   }
   return {

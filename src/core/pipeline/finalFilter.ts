@@ -6,6 +6,8 @@ export interface FinalFilterParams {
   hoursOld: number;
   remoteOnly: boolean;
   includeUndated: boolean;
+  /** Reject Indeed URLs (default true). */
+  excludeIndeed?: boolean;
 }
 
 /**
@@ -20,8 +22,10 @@ export function isValidFinalJob(job: NormalizedJob, params: FinalFilterParams): 
   if (!job.us_eligible) reasons.push('not available to US workers');
   if (job.age_hours !== null && job.age_hours > params.hoursOld) reasons.push(`older than ${params.hoursOld}h`);
   if (job.age_hours === null && !params.includeUndated) reasons.push('unknown posting date');
-  for (const url of [job.job_url, job.apply_url, job.canonical_url, job.source_url]) {
-    if (url && isIndeedUrl(url)) reasons.push('Indeed URL');
+  if (params.excludeIndeed ?? true) {
+    for (const url of [job.job_url, job.apply_url, job.canonical_url, job.source_url]) {
+      if (url && isIndeedUrl(url)) reasons.push('Indeed URL');
+    }
   }
   if (!isHttpUrl(job.job_url)) reasons.push('invalid job URL');
   if (job.apply_url && !isHttpUrl(job.apply_url)) reasons.push('invalid apply URL');

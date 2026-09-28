@@ -2,7 +2,7 @@
 
 Finds **current, fully-remote, US-eligible healthcare administration jobs** (medical billing, medical coding, credentialing, revenue cycle and similar roles) across several job platforms. It merges duplicates and writes the results to **CSV or JSON**.
 
-Indeed, and any listing that routes through Indeed, is excluded on purpose.
+indeed.com itself is never scraped (it blocks automated access). Indeed's jobs can still arrive through SimplyHired (Indeed's own sister site), CareerJet and Jooble. By default these are dropped; set `ALLOW_INDEED_NETWORK_SOURCES=true` and `EXCLUDE_INDEED=false` to keep them.
 
 It can run as a **command-line tool** or as an **HTTP API**.
 
@@ -17,7 +17,7 @@ It can run as a **command-line tool** or as an **HTTP API**.
    - **open to US applicants.** Canada, UK, LATAM, India and other non-US jobs are rejected.
    - **relevant.** A "Python coder" is not a medical coder.
    - **recent.** By default, posted in the last 24 hours.
-   - **not routed through Indeed.**
+   - **not routed through Indeed** (by default; see `EXCLUDE_INDEED`).
 4. Merges the same job posted on several sites into one row.
 5. Sorts by newest first and writes a CSV or JSON file.
 6. Saves every run in a local SQLite database so it can mark jobs as **new** or **reposted** on later runs.
@@ -37,10 +37,10 @@ It can run as a **command-line tool** or as an **HTTP API**.
 | Jobicy | ✅ working | public API |
 | Canada Job Bank | ✅ working | RSS feed (US-eligible jobs only) |
 | Jooble | 🔑 needs a free API key | official API. Set `JOOBLE_API_KEY` |
-| SimplyHired | ⛔ opt-in | owned by Indeed. Runs when `ALLOW_INDEED_NETWORK_SOURCES=true`; listings that apply through Indeed are still dropped |
+| SimplyHired | ⛔ opt-in | Indeed's sister site, serving Indeed's listings. Runs when `ALLOW_INDEED_NETWORK_SOURCES=true`; listings that apply through Indeed are kept only with `EXCLUDE_INDEED=false` |
 | ZipRecruiter, Glassdoor, Monster, CareerBuilder, Wellfound, Built In | 🚫 blocked | bot protection (Cloudflare / DataDome). Reachability check only |
 | FlexJobs | 🚫 blocked | Akamai "Access Denied" (HTTP 403) on every page; paid-membership site. Reachability check only |
-| Indeed | 🚫 excluded | excluded by design, and Cloudflare-protected (HTTP 403). Listed for its reachability check only; it never runs and `--sources indeed` is refused |
+| Indeed | 🚫 blocked | Cloudflare-protected (HTTP 403), so indeed.com is never scraped. Its jobs arrive through SimplyHired, CareerJet and Jooble when `EXCLUDE_INDEED=false` |
 
 Run `npm run cli -- probe` to see which sources are reachable right now.
 
@@ -240,6 +240,7 @@ Each row is one unique job. The main columns are:
 | `posted_at`, `age_hours`, `date_confidence` | When it was posted and how sure we are |
 | `description` | Plain-text job description |
 | `job_url`, `apply_url` | Link to the listing / employer application |
+| `via_indeed` | `true` when the listing or its application goes through Indeed (only kept with `EXCLUDE_INDEED=false`) |
 | `ats_provider` | Workday, Greenhouse, iCIMS… when detected |
 | `listing_type` | Direct employer vs staffing agency |
 | `is_new`, `first_seen_at`, `reposted_at` | Compared with earlier runs |
@@ -270,6 +271,8 @@ Every setting is optional. See [`.env.example`](.env.example) for the full list 
 | `INCLUDE_UNDATED` | `true` | Keep jobs with unknown posting date |
 | `ENABLED_SOURCES` / `DISABLED_SOURCES` | – | Choose sources (comma-separated ids) |
 | `JOOBLE_API_KEY` | – | Enables Jooble ([get a key](https://jooble.org/api/about)) |
+| `ALLOW_INDEED_NETWORK_SOURCES` | `false` | Runs SimplyHired (Indeed's sister site) |
+| `EXCLUDE_INDEED` | `true` | Drops listings that route through Indeed. Set `false` to keep Indeed jobs |
 | `CAREERJET_AFFID` | – | CareerJet affiliate id (optional) |
 | `PROXY_URL` | – | Outbound HTTP proxy |
 | `RUN_TIMEOUT_MS` | `900000` | Hard cap per run (partial results are returned) |

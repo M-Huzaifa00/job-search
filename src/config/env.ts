@@ -63,6 +63,7 @@ const EnvSchema = z.object({
   INCLUDE_UNDATED: bool(true),
   EXCLUDE_REPOST_AGGREGATORS: bool(true),
   ALLOW_INDEED_NETWORK_SOURCES: bool(false),
+  EXCLUDE_INDEED: bool(true),
   PROBE_BLOCKED_SOURCES: bool(true),
 
   SEARCH_CACHE_TTL_MS: int(600_000, 0, 86_400_000),
@@ -152,6 +153,8 @@ export function buildConfig(env: NodeJS.ProcessEnv = process.env) {
     includeUndated: e.INCLUDE_UNDATED,
     excludeRepostAggregators: e.EXCLUDE_REPOST_AGGREGATORS,
     allowIndeedNetworkSources: e.ALLOW_INDEED_NETWORK_SOURCES,
+    /** Drop listings whose URL or application goes through Indeed (indeed.com itself is never requested). */
+    excludeIndeed: e.EXCLUDE_INDEED,
     probeBlockedSources: e.PROBE_BLOCKED_SOURCES,
 
     searchCacheTtlMs: e.SEARCH_CACHE_TTL_MS,

@@ -78,7 +78,7 @@ describe('HTTP API', () => {
     assert.equal(byId.indeed.enabled, false);
   });
 
-  it('POST /api/jobs/search refuses Indeed as a source', async () => {
+  it('POST /api/jobs/search refuses Indeed as a source while EXCLUDE_INDEED is on (default)', async () => {
     const res = await app.inject({ method: 'POST', url: '/api/jobs/search', payload: { sources: ['indeed'] } });
     assert.equal(res.statusCode, 400);
     assert.match(JSON.stringify(res.json()), /Indeed is excluded/);

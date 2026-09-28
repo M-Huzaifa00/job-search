@@ -24,6 +24,8 @@ export interface NormalizeOptions {
   remoteOnly: boolean;
   includeUndated: boolean;
   excludeRepostAggregators: boolean;
+  /** Reject listings routed through Indeed (default true). */
+  excludeIndeed?: boolean;
   now: Date;
   sourceName: (id: SourceId) => string;
 }
@@ -78,11 +80,11 @@ export function normalizeJob(raw: RawJob, opts: NormalizeOptions): NormalizedJob
     applyDomainMatchesCompany: quality.applyDomainMatchesCompany,
   });
 
+  const viaIndeed = [jobUrl, applyUrl, canonicalUrl, raw.sourceUrl].some((u) => isIndeedUrl(u)) || !!raw.viaIndeed || mentionsIndeedOrigin(raw.originSite);
+
   const rejection = decideRejection({
     raw,
-    jobUrl,
-    applyUrl,
-    canonicalUrl,
+    viaIndeed,
     hardFlags: quality.hardFlags,
     relevant: relevance.relevant,
     relevanceReason: relevance.excluded_reason,
@@ -142,6 +144,7 @@ export function normalizeJob(raw: RawJob, opts: NormalizeOptions): NormalizedJob
     apply_url: applyUrl,
     canonical_url: canonicalUrl,
     source_url: raw.sourceUrl ?? null,
+    via_indeed: viaIndeed,
 
     ats_provider: ats?.provider ?? null,
     ats_job_id: ats?.jobId ?? null,
@@ -165,9 +168,7 @@ export function normalizeJob(raw: RawJob, opts: NormalizeOptions): NormalizedJob
 
 interface RejectionInput {
   raw: RawJob;
-  jobUrl: string;
-  applyUrl: string | null;
-  canonicalUrl: string;
+  viaIndeed: boolean;
   hardFlags: string[];
   relevant: boolean;
   relevanceReason: string | null;
@@ -181,8 +182,7 @@ interface RejectionInput {
 
 /** First failing check wins, so each rejected job is counted under exactly one reason. */
 function decideRejection(i: RejectionInput): RejectionReason | null {
-  const urls = [i.jobUrl, i.applyUrl, i.canonicalUrl, i.raw.sourceUrl];
-  if (urls.some((u) => isIndeedUrl(u)) || i.raw.viaIndeed || mentionsIndeedOrigin(i.raw.originSite)) {
+  if ((i.opts.excludeIndeed ?? true) && i.viaIndeed) {
     return { code: 'indeed', detail: 'listing or application routes through Indeed' };
   }
   const invalid: string[] = i.hardFlags.filter((f) => f === 'missing_title' || f === 'invalid_job_url' || f === 'missing_employer');

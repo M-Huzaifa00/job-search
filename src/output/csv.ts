@@ -23,6 +23,7 @@ export const CSV_COLUMNS: (keyof NormalizedJob)[] = [
   'description',
   'job_url',
   'apply_url',
+  'via_indeed',
   'ats_provider',
   'listing_type',
   'canonical_url',

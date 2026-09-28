@@ -20,7 +20,7 @@ export interface LinkValidationStats {
  */
 export async function validateLinks(
   jobs: NormalizedJob[],
-  opts: { mode: 'off' | 'redirects' | 'all'; max: number; http: SourceHttp; log: Logger; signal: AbortSignal },
+  opts: { mode: 'off' | 'redirects' | 'all'; max: number; http: SourceHttp; log: Logger; signal: AbortSignal; excludeIndeed?: boolean },
 ): Promise<LinkValidationStats> {
   const stats: LinkValidationStats = { checked: 0, indeed: 0, broken: 0, errors: 0 };
   if (opts.mode === 'off') return stats;
@@ -40,8 +40,11 @@ export async function validateLinks(
       stats.checked++;
       if (r.viaIndeed) {
         stats.indeed++;
-        job.rejection = { code: 'indeed', detail: `application redirects to Indeed (${new URL(r.finalUrl).host})` };
-        return;
+        job.via_indeed = true;
+        if (opts.excludeIndeed ?? true) {
+          job.rejection = { code: 'indeed', detail: `application redirects to Indeed (${new URL(r.finalUrl).host})` };
+          return;
+        }
       }
       if (r.status === 404 || r.status === 410) {
         stats.broken++;

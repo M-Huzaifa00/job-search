@@ -148,6 +148,8 @@ export interface NormalizedJob {
   apply_url: string | null;
   canonical_url: string;
   source_url: string | null;
+  /** The listing or its application goes through Indeed (kept only when EXCLUDE_INDEED=false). */
+  via_indeed: boolean;
 
   ats_provider: string | null;
   ats_job_id: string | null;

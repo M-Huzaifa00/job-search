@@ -41,6 +41,7 @@ export function formatMetrics(m: RunMetrics, hoursOld: number): string {
     `Removed as duplicates:        ${fmt(m.removed_duplicates)}`,
     '',
     `Final unique jobs:            ${fmt(m.final_unique_jobs)}`,
+    `  of which via Indeed:        ${fmt(m.indeed_jobs ?? 0)}`,
   ].join('\n');
 }
 

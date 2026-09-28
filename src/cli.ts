@@ -52,7 +52,7 @@ function writePortalLinks(path: string, titles: string[], q: { hoursOld: number;
 }
 
 const program = new Command();
-program.name('job-scraper').description('Aggregates current, fully-remote, US-eligible healthcare administration jobs (Indeed excluded).');
+program.name('job-scraper').description('Aggregates current, fully-remote, US-eligible healthcare administration jobs.');
 
 program
   .command('search')
