@@ -63,8 +63,25 @@ export interface ProbeResult {
   httpStatus?: number;
 }
 
+export interface ManualSearchQuery {
+  keyword: string;
+  hoursOld: number;
+  remoteOnly: boolean;
+}
+
+export interface ManualSearchLink {
+  url: string;
+  /** Filters encoded in the link ("remote", "US", "last 24h"); anything not listed must be set on the site. */
+  filters: string[];
+}
+
 export interface SourceAdapter {
   meta: SourceMeta;
+  /**
+   * A search URL for a person to open in their own browser. Sources that refuse automated access
+   * provide this instead of results, so their listings can still be reviewed and applied to by hand.
+   */
+  manualSearch?(q: ManualSearchQuery): ManualSearchLink;
   /** Returns why the adapter cannot run with the current configuration (e.g. missing API key). */
   unavailableReason?(config: AppConfig): { category: ErrorCategory; message: string } | null;
   searchJobs(q: SearchQuery, ctx: SourceContext): Promise<SearchPage>;

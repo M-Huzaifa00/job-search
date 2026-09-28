@@ -28,6 +28,8 @@ It can run as a **command-line tool** or as an **HTTP API**.
 |---|---|---|
 | LinkedIn | ✅ working | public job-search pages |
 | JobRight | ✅ working | the site's own logged-out search API (remote, US, posted-within filters) |
+| Himalayas | ✅ working | free public API (US, newest first) |
+| We Work Remotely | ✅ working | public RSS feeds (mostly tech jobs, so medical roles are rare) |
 | CareerJet | ✅ working | official API |
 | Dice | ✅ working | public search pages |
 | RemoteOK | ✅ working | public JSON feed |
@@ -35,7 +37,7 @@ It can run as a **command-line tool** or as an **HTTP API**.
 | Jobicy | ✅ working | public API |
 | Canada Job Bank | ✅ working | RSS feed (US-eligible jobs only) |
 | Jooble | 🔑 needs a free API key | official API. Set `JOOBLE_API_KEY` |
-| SimplyHired | ⛔ off by default | owned by Indeed. Opt in with `ALLOW_INDEED_NETWORK_SOURCES=true` |
+| SimplyHired | ⛔ opt-in | owned by Indeed. Runs when `ALLOW_INDEED_NETWORK_SOURCES=true`; listings that apply through Indeed are still dropped |
 | ZipRecruiter, Glassdoor, Monster, CareerBuilder, Wellfound, Built In | 🚫 blocked | bot protection (Cloudflare / DataDome). Reachability check only |
 | FlexJobs | 🚫 blocked | Akamai "Access Denied" (HTTP 403) on every page; paid-membership site. Reachability check only |
 | Indeed | 🚫 excluded | excluded by design, and Cloudflare-protected (HTTP 403). Listed for its reachability check only; it never runs and `--sources indeed` is refused |
@@ -43,6 +45,20 @@ It can run as a **command-line tool** or as an **HTTP API**.
 Run `npm run cli -- probe` to see which sources are reachable right now.
 
 Blocked sources are never scraped. Solving or getting around CAPTCHAs and bot checks is out of scope. Each blocked source makes one request when probed, to report its current status.
+
+### Links for the blocked portals
+
+You can still review and apply to jobs on the blocked portals yourself. The scraper writes a page of search links, one per job title for each portal it can't collect from: ZipRecruiter, Glassdoor, Indeed, FlexJobs, CareerBuilder, Monster, Built In and Wellfound, plus SimplyHired while it is switched off. Open the links in your own browser. Each link is already set to your title, and where the site supports it, to remote, US and the posting-age window. The page lists the filters each link sets; set anything else on the site.
+
+```bash
+# Jobs CSV plus the links page in one run
+npm run search -- --output output/jobs.csv --portal-links output/portal_links.html
+
+# Only the links page (instant, sends no requests)
+npm run cli -- links
+```
+
+The filter settings in these links were built from each site's own URL format but could not be tested automatically, because the sites block automated requests. The first time you open a portal's link, check that its filters look right.
 
 ---
 
@@ -132,15 +148,17 @@ Without `--output`, the CSV is printed to the terminal.
 | `--include-rejected` | JSON only: include rejected jobs with the reason | off |
 | `--no-details` | Skip job-detail pages | details on |
 | `--no-persist` | Don't save to the SQLite database | saves |
+| `--portal-links <file>` | Also write search links for the blocked portals (`.html` page, or `.csv`) | off |
 | `--log-level <level>` | `debug`, `info`, `warn`, `error` | `info` |
 
-Source ids: `linkedin`, `jobright`, `dice`, `remoteok`, `remotive`, `jobicy`, `careerjet`, `jooble`, `canada_job_bank`, `simplyhired`.
+Source ids: `linkedin`, `jobright`, `himalayas`, `weworkremotely`, `dice`, `remoteok`, `remotive`, `jobicy`, `careerjet`, `jooble`, `canada_job_bank`, `simplyhired`.
 
 Probe-only ids (for `npm run cli -- probe <id>`): `ziprecruiter`, `glassdoor`, `careerbuilder`, `monster`, `wellfound`, `builtin`, `flexjobs`, `indeed`.
 
 ### Other commands
 
 ```bash
+npm run cli -- links          # search links for the blocked portals (output/portal_links.html)
 npm run cli -- sources        # list sources, status and last-run results
 npm run cli -- probe          # live reachability check of every source
 npm run cli -- probe linkedin # check one source
@@ -286,7 +304,7 @@ src/
     pipeline/            final strict filter
   services/              search orchestration, reports, link validation
   db/                    SQLite persistence (runs, jobs, repost tracking)
-  output/                CSV and JSON writers
+  output/                CSV, JSON and portal-links writers
   http/                  HTTP client with retries, rate limits, bot-block detection
 tests/                   unit and integration tests
 ```
@@ -296,7 +314,7 @@ tests/                   unit and integration tests
 ## Notes and limitations
 
 - Results depend on what each site shows publicly at that moment. Sites change their pages over time, and a parser may need updating when they do. `npm run cli -- probe` shows which sources are healthy.
-- Most results come from LinkedIn, JobRight and CareerJet. RemoteOK, Remotive and Jobicy list few medical jobs.
+- Most results come from LinkedIn, JobRight, Himalayas and SimplyHired (when enabled). RemoteOK, Remotive, Jobicy and We Work Remotely list few medical jobs.
 - JobRight matches job titles narrowly, so some titles return only a few jobs. Its descriptions are JobRight's own AI summaries (summary, responsibilities, requirements), not the original posting. The employer's apply link is shown only to logged-in users, so the `job_url` column links to the JobRight job page. Many JobRight listings are copies of LinkedIn jobs; these are merged into one row. Because JobRight hides where the application goes, the Indeed check cannot see Indeed-routed applications for JobRight listings.
 - Several large job boards block automated access and are not scraped.
 - LinkedIn often shows the employer's city as the location, even for remote jobs. The remote check reads the full job description, but open a few listings to confirm.

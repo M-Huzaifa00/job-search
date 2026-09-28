@@ -1,6 +1,6 @@
 node_modules/
 data/
-output/
+/output/
 *.db
 *.db-journal
 *.db-wal

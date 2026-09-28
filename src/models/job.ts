@@ -14,6 +14,8 @@ export const SOURCE_IDS = [
   'canada_job_bank',
   'careerjet',
   'jobright',
+  'himalayas',
+  'weworkremotely',
   'builtin',
   'flexjobs',
   'indeed',

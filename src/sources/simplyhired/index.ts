@@ -19,7 +19,8 @@ export const simplyhired: SourceAdapter = {
     method: 'http-html',
     methodDetail: 'Server-rendered Next.js data (__NEXT_DATA__) on search and job pages',
     status: 'restricted',
-    defaultEnabled: false,
+    // Runs by default once ALLOW_INDEED_NETWORK_SOURCES=true; until then unavailableReason skips it.
+    defaultEnabled: true,
     homepage: 'https://www.simplyhired.com',
     notes:
       'SimplyHired states it "is part of the Indeed Site" and its listings come from Indeed\'s index (records carry dateOnIndeed / indeedApply). Because Indeed must be excluded, this source only runs when ALLOW_INDEED_NETWORK_SOURCES=true, and even then every listing that applies through Indeed is rejected.',
@@ -31,6 +32,13 @@ export const simplyhired: SourceAdapter = {
 
   unavailableReason(config) {
     return config.allowIndeedNetworkSources ? null : { category: 'UNSUPPORTED', message: 'disabled by policy: SimplyHired is operated by Indeed (set ALLOW_INDEED_NETWORK_SOURCES=true to opt in)' };
+  },
+
+  manualSearch({ keyword, hoursOld, remoteOnly }) {
+    const days = daysFilter(hoursOld);
+    const params = new URLSearchParams({ q: keyword, l: 'United States', t: days });
+    if (remoteOnly) params.set('wl', 'remote');
+    return { url: `https://www.simplyhired.com/search?${params}`, filters: [...(remoteOnly ? ['remote'] : []), 'US', days === '1' ? 'last 24h' : `last ${days} days`] };
   },
 
   async searchJobs(q, ctx) {
@@ -48,6 +56,12 @@ export const simplyhired: SourceAdapter = {
     if (next) cursors.set(`${q.keyword}|${q.page + 1}`, next);
     const jobs = data.jobs.filter((j) => j.jobKey && j.title).map((j) => simplyHiredJobToRaw(j, { fetchedAt: res.fetchedAt, keyword: q.keyword, sourceUrl: url, remoteFiltered: q.remoteOnly }));
     return { jobs, hasMore: !!next && jobs.length > 0, requestUrl: url, total: data.resultCount };
+  },
+
+  async probe(ctx) {
+    const res = await ctx.http.getText('https://www.simplyhired.com/search?q=medical+billing&l=United+States&wl=remote', { signal: ctx.signal, retries: 0 });
+    const n = parseSimplyHiredSearch(res.text).jobs.length;
+    return { ok: n > 0, message: `search returned ${n} jobs`, httpStatus: res.status };
   },
 
   async fetchDetails(job, ctx): Promise<Partial<RawJob> | null> {

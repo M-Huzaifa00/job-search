@@ -3,7 +3,44 @@ import { describe, it } from 'node:test';
 import { openDatabase } from '../src/db/database.ts';
 import { Repository } from '../src/db/repository.ts';
 import { CSV_COLUMNS, csvCell, jobsToCsv } from '../src/output/csv.ts';
+import { buildPortalLinks, portalLinksToCsv, portalLinksToHtml } from '../src/output/portalLinks.ts';
+import { dayBucket } from '../src/sources/blocked.ts';
 import { NOW, hoursAgo, normalize, rawJob } from './helpers.ts';
+
+describe('portal search links', () => {
+  const set = buildPortalLinks(['medical billing', 'credentialing specialist'], { hoursOld: 24, remoteOnly: true });
+
+  it('covers every blocked or policy-disabled portal and none of the scraped ones', () => {
+    const ids = set.portals.map((p) => p.id).sort();
+    assert.deepEqual(ids, ['builtin', 'careerbuilder', 'flexjobs', 'glassdoor', 'indeed', 'monster', 'simplyhired', 'wellfound', 'ziprecruiter']);
+    assert.equal(set.rows.length, 2);
+  });
+
+  it('encodes the title and the remote / last-24h filters in the URL', () => {
+    const zip = new URL(set.rows[0].urls.ziprecruiter!);
+    assert.equal(zip.searchParams.get('search'), 'medical billing');
+    assert.equal(zip.searchParams.get('days'), '1');
+    assert.equal(new URL(set.rows[1].urls.glassdoor!).searchParams.get('fromAge'), '1');
+    assert.equal(new URL(set.rows[1].urls.indeed!).searchParams.get('fromage'), '1');
+    assert.deepEqual(set.portals.find((p) => p.id === 'ziprecruiter')!.filters, ['remote', 'last 24h']);
+  });
+
+  it('picks the smallest date option a site offers that covers the window', () => {
+    assert.equal(dayBucket(24, [1, 5, 10, 30]), 1);
+    assert.equal(dayBucket(48, [1, 5, 10, 30]), 5);
+    assert.equal(dayBucket(72, [1, 3, 7, 14]), 3);
+    assert.equal(dayBucket(24 * 60, [1, 3, 7, 14]), null);
+  });
+
+  it('writes an escaped HTML page and a CSV with one row per link', () => {
+    const html = portalLinksToHtml(buildPortalLinks(['billing & <coding>'], { hoursOld: 24, remoteOnly: true }));
+    assert.match(html, /<title>Portal Search Links<\/title>/);
+    assert.match(html, /billing &amp; &lt;coding&gt;/);
+    assert.ok(!html.includes('<coding>'));
+    const csv = portalLinksToCsv(set);
+    assert.equal(csv.trim().split('\r\n').length, 1 + 2 * set.portals.length);
+  });
+});
 
 describe('CSV output', () => {
   it('contains every required column', () => {

@@ -6,10 +6,11 @@ import { loadConfig, type AppConfig } from './config/env.ts';
 import type { SourceId } from './models/job.ts';
 import { jobsToCsv } from './output/csv.ts';
 import { resultToJson } from './output/json.ts';
+import { buildPortalLinks, portalLinksToCsv, portalLinksToHtml } from './output/portalLinks.ts';
 import { createAppContext } from './services/context.ts';
 import { runSearch } from './services/searchService.ts';
 import { listSources, probeSources } from './services/sourceStatus.ts';
-import { resolveSourceId } from './sources/registry.ts';
+import { allAdapters, resolveSourceId } from './sources/registry.ts';
 import { createLogger } from './utils/logger.ts';
 
 const int = (name: string) => (value: string) => {
@@ -25,6 +26,29 @@ const list = (value: string) =>
 
 function withLogLevel(config: AppConfig, level?: string): AppConfig {
   return level ? { ...config, logLevel: level as AppConfig['logLevel'] } : config;
+}
+
+function readTitlesFile(path: string): string[] {
+  return readFileSync(resolve(path), 'utf8')
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith('#'));
+}
+
+function writeFile(path: string, body: string): string {
+  const full = resolve(path);
+  mkdirSync(dirname(full), { recursive: true });
+  writeFileSync(full, body, 'utf8');
+  return full;
+}
+
+/** HTML page of clickable links, or CSV when the file name ends in .csv. */
+function writePortalLinks(path: string, titles: string[], q: { hoursOld: number; remoteOnly: boolean }, config: AppConfig): { path: string; count: number } {
+  // Only portals this configuration can't collect from (blocked, or off by policy).
+  const set = buildPortalLinks(titles, q, allAdapters().filter((a) => a.unavailableReason?.(config)));
+  const bom = config.csvBom;
+  const body = path.toLowerCase().endsWith('.csv') ? portalLinksToCsv(set, { bom }) : portalLinksToHtml(set);
+  return { path: writeFile(path, body), count: set.rows.length * set.portals.length };
 }
 
 const program = new Command();
@@ -50,16 +74,12 @@ program
   .option('--include-undated', 'keep listings without a posting date')
   .option('--no-details', 'skip job-detail page fetching (faster, less accurate)')
   .option('--no-persist', 'do not write to the SQLite database')
+  .option('--portal-links <file>', 'also write search links for the portals that block scraping (.html page, or .csv)')
   .addOption(new Option('--log-level <level>', 'log verbosity').choices(['debug', 'info', 'warn', 'error']))
   .action(async (opts) => {
     const config = withLogLevel(loadConfig(), opts.logLevel);
     let titles: string[] | undefined = opts.titles;
-    if (opts.titlesFile) {
-      titles = readFileSync(resolve(opts.titlesFile), 'utf8')
-        .split(/\r?\n/)
-        .map((l) => l.trim())
-        .filter((l) => l && !l.startsWith('#'));
-    }
+    if (opts.titlesFile) titles = readTitlesFile(opts.titlesFile);
     const req = parseSearchRequest(
       {
         titles,
@@ -88,16 +108,33 @@ program
       const result = await runSearch(ctx, req, { signal: controller.signal });
       const body = opts.format === 'json' ? resultToJson(result) : jobsToCsv(result.jobs, { bom: config.csvBom && !!opts.output });
       if (opts.output) {
-        const path = resolve(opts.output);
-        mkdirSync(dirname(path), { recursive: true });
-        writeFileSync(path, body, 'utf8');
+        const path = writeFile(opts.output, body);
         ctx.logger.info(`wrote ${result.jobs.length} jobs to ${path}`);
       } else {
         process.stdout.write(body);
       }
+      if (opts.portalLinks) {
+        const links = writePortalLinks(opts.portalLinks, req.titles, { hoursOld: req.hoursOld, remoteOnly: req.remoteOnly }, config);
+        ctx.logger.info(`wrote ${links.count} portal search links to ${links.path}`);
+      }
     } finally {
       await ctx.close();
     }
+  });
+
+program
+  .command('links')
+  .description('write search links for the portals that block scraping, to open in your own browser (instant, no requests)')
+  .option('--titles <list>', 'comma-separated job titles / search terms (default: the 20 built-in healthcare terms)', list)
+  .option('--titles-file <path>', 'file with one search term per line')
+  .option('--hours-old <n>', 'maximum posting age in hours', int('hours-old'))
+  .option('--no-remote-only', 'do not restrict the links to remote jobs')
+  .option('--output <file>', 'where to write the links (.html page, or .csv)', 'output/portal_links.html')
+  .action((opts) => {
+    const config = loadConfig();
+    const req = parseSearchRequest({ titles: opts.titlesFile ? readTitlesFile(opts.titlesFile) : opts.titles, hoursOld: opts.hoursOld, remoteOnly: opts.remoteOnly }, config);
+    const links = writePortalLinks(opts.output, req.titles, { hoursOld: req.hoursOld, remoteOnly: req.remoteOnly }, config);
+    createLogger({ level: 'info' }).info(`wrote ${links.count} portal search links to ${links.path}`);
   });
 
 program

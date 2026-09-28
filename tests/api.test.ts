@@ -56,18 +56,21 @@ describe('HTTP API', () => {
     assert.deepEqual(res.json(), { status: 'ok' });
   });
 
-  it('GET /api/sources lists all 18 sources with status and method', async () => {
+  it('GET /api/sources lists all 20 sources with status and method', async () => {
     const res = await app.inject({ method: 'GET', url: '/api/sources' });
     const body = res.json() as { id: string; status: string; method: string; enabled: boolean }[];
-    assert.equal(body.length, 18);
+    assert.equal(body.length, 20);
     const byId = Object.fromEntries(body.map((s) => [s.id, s]));
     assert.equal(byId.linkedin.status, 'working');
     assert.equal(byId.jobright.status, 'working');
     assert.equal(byId.jobright.enabled, true);
+    assert.equal(byId.himalayas.enabled, true);
+    assert.equal(byId.weworkremotely.method, 'rss');
     assert.equal(byId.remoteok.method, 'api');
     assert.equal(byId.glassdoor.status, 'blocked');
     assert.equal(byId.glassdoor.enabled, false);
     assert.equal(byId.flexjobs.status, 'blocked');
+    // Off until ALLOW_INDEED_NETWORK_SOURCES=true (this test config leaves it unset).
     assert.equal(byId.simplyhired.enabled, false);
     // Indeed is listed so its status is visible, but it is probe-only and never runs.
     assert.equal(byId.indeed.status, 'blocked');

@@ -5,7 +5,9 @@ import { parseCareerjet } from '../src/sources/careerjet/parse.ts';
 import { parseDiceSearch } from '../src/sources/dice/parse.ts';
 import { parseJobicy } from '../src/sources/jobicy/parse.ts';
 import { jobRightItemToRaw, parseJobRightSearch, parsePublishTime } from '../src/sources/jobright/parse.ts';
+import { parseHimalayas } from '../src/sources/himalayas/parse.ts';
 import { parseJooble } from '../src/sources/jooble/parse.ts';
+import { parseWeWorkRemotely } from '../src/sources/weworkremotely/parse.ts';
 import { parseLinkedInDetail, parseLinkedInSearch } from '../src/sources/linkedin/parse.ts';
 import { parseRemoteOk } from '../src/sources/remoteok/parse.ts';
 import { parseRemotive } from '../src/sources/remotive/parse.ts';
@@ -243,6 +245,67 @@ describe('API/feed parsers', () => {
     );
     assert.match(j.descriptionText!, /physician-led[\s\S]*Responsibilities:\n- Prepare[\s\S]*Requirements:\n- Working knowledge of CAQH/);
     assert.equal(parsePublishTime('not a date'), null);
+  });
+
+  it('Himalayas maps location restrictions, epoch pubDate and salary period', () => {
+    // Trimmed from a live /jobs/api/search response.
+    const [us, anywhere] = parseHimalayas(
+      {
+        totalCount: 639,
+        jobs: [
+          {
+            title: 'Medical Billing Specialist',
+            companyName: 'Mercy Urgent Care',
+            employmentType: 'Full Time',
+            minSalary: 20,
+            maxSalary: 24,
+            salaryPeriod: 'hourly',
+            currency: 'USD',
+            locationRestrictions: ['United States'],
+            categories: ['Medical-Billing', 'Healthcare-Administration'],
+            parentCategories: ['Healthcare'],
+            description: '<p>Submit claims</p>',
+            pubDate: 1790550339,
+            applicationLink: 'https://himalayas.app/companies/mercy-urgent-care/jobs/medical-billing-specialist',
+            guid: 'https://himalayas.app/companies/mercy-urgent-care/jobs/medical-billing-specialist',
+          },
+          { title: 'Medical Coder', companyName: 'Acme', excerpt: 'Code charts', guid: 'https://himalayas.app/companies/acme/jobs/medical-coder', applicationLink: 'https://acme.example/apply' },
+        ],
+      },
+      { ...CTX, usFiltered: true },
+    );
+    assert.deepEqual(us.applicantLocations, ['United States']);
+    assert.equal(us.postedAt, 1790550339);
+    assert.deepEqual(us.salary, { min: 20, max: 24, currency: 'USD', period: 'hour' });
+    assert.equal(us.applyUrl, null);
+    assert.ok(us.tags?.includes('Medical Billing'));
+    assert.deepEqual(anywhere.applicantLocations, ['Worldwide']);
+    assert.equal(anywhere.applyUrl, 'https://acme.example/apply');
+    assert.equal(anywhere.descriptionIsSnippet, true);
+  });
+
+  it('We Work Remotely RSS: splits "Company: Title", strips the flag, keeps region', () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><item>
+      <title>Checkr: Contract Recruiter</title>
+      <region>Anywhere in the World</region>
+      <country>🇺🇸 United States of America</country>
+      <state></state>
+      <skills>Recruiting, Sourcing</skills>
+      <category>Management and Finance</category>
+      <type>Full-Time</type>
+      <description>&lt;p&gt;Hire people&lt;/p&gt;</description>
+      <pubDate>Sun, 27 Sep 2026 07:30:55 +0000</pubDate>
+      <guid>https://weworkremotely.com/remote-jobs/checkr-contract-recruiter</guid>
+      <link>https://weworkremotely.com/remote-jobs/checkr-contract-recruiter</link>
+    </item></channel></rss>`;
+    const [j] = parseWeWorkRemotely(xml, CTX);
+    assert.equal(j.company, 'Checkr');
+    assert.equal(j.title, 'Contract Recruiter');
+    assert.equal(j.location, 'United States of America');
+    assert.deepEqual(j.applicantLocations, ['Anywhere in the World']);
+    assert.equal(j.descriptionHtml, '<p>Hire people</p>');
+    assert.equal(j.sourceJobId, 'checkr-contract-recruiter');
+    assert.deepEqual(j.tags, ['Management and Finance', 'Recruiting', 'Sourcing']);
   });
 
   it('JobRight hybrid work model becomes a structured hybrid hint', () => {
