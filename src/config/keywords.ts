@@ -1,0 +1,23 @@
+/** The default search terms. Every term is searched independently on every enabled source. */
+export const DEFAULT_TITLES: string[] = [
+  'medical billing',
+  'medical biller',
+  'medical billing specialist',
+  'medical billing insurance',
+  'revenue cycle',
+  'revenue cycle specialist',
+  'revenue cycle coordinator',
+  'rcm billing',
+  'credentialing specialist',
+  'credentialing coordinator',
+  'medical credentialing',
+  'provider credentialing',
+  'provider enrollment',
+  'medical coding',
+  'medical coder',
+  'medical billing coding',
+  'reimbursement specialist',
+  'medical collections',
+  'medical insurance coordinator',
+  'ehr support specialist',
+];

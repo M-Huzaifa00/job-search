@@ -1,0 +1,32 @@
+{
+  "name": "medical-remote-job-aggregator",
+  "version": "1.0.0",
+  "description": "Aggregates current, fully-remote, US-eligible healthcare administration jobs (medical billing, coding, credentialing, revenue cycle) from multiple job platforms. Indeed is excluded.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "bin": {
+    "job-scraper": "bin/job-scraper.mjs"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/server.ts",
+    "dev": "node --disable-warning=ExperimentalWarning --watch src/server.ts",
+    "search": "node --disable-warning=ExperimentalWarning src/cli.ts search",
+    "cli": "node --disable-warning=ExperimentalWarning src/cli.ts",
+    "test": "node --disable-warning=ExperimentalWarning --test \"tests/**/*.test.ts\"",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "cheerio": "^1.1.2",
+    "commander": "^14.0.0",
+    "fastify": "^5.4.0",
+    "undici": "^7.13.0",
+    "zod": "^4.0.17"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2"
+  }
+}

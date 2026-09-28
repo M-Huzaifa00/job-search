@@ -1,0 +1,13 @@
+node_modules/
+data/
+output/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.env
+*.log
+medical_jobs.csv
+medical_remote_jobs.csv
+jobs.csv
+jobs.json
