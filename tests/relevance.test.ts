@@ -64,6 +64,28 @@ describe('loose-match false positives are rejected', () => {
   }
 });
 
+describe('non-healthcare senses of healthcare words do not count as context', () => {
+  // Both were accepted from JobRight before these phrases were neutralised.
+  it('visa "CPT, OPT" and "energy provider" do not make a utility billing job medical', () => {
+    const desc =
+      'Consumers Energy is a Michigan energy provider serving residential and commercial customers. Investigate billing, meter, and rate discrepancies. We are unable to hire individuals with CPT, OPT, or STEM OPT for this position.';
+    assert.equal(rel('Billing Exception Spec', desc, 'Consumers Energy').relevant, false);
+  });
+
+  it('"patient, personable" and "data providers" do not make a fintech billing job medical', () => {
+    const desc =
+      'Market data platform. Own billing-related customer support, invoices and disputes, and exchange fees (e.g., paying data providers directly). A genuine customer service orientation — patient, personable. Experience in healthcare billing/insurance coordination is a plus.';
+    assert.equal(rel('Billing Support Specialist', desc, 'Databento').relevant, false);
+  });
+
+  it('real healthcare uses of the same words still count', () => {
+    const desc = 'Verify coverage for patients before visits, work with providers on CPT and ICD-10 coding questions, and post payments.';
+    const r = rel('Billing Specialist', desc, 'Acme Physicians Group');
+    assert.equal(r.relevant, true);
+    assert.ok(r.healthcare_context >= 3);
+  });
+});
+
 describe('medical coder vs software coder', () => {
   it('a coder with medical-coding context is a medical coder', () => {
     const r = rel('Coder II', CODING_DESC);

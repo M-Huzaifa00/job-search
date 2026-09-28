@@ -272,6 +272,23 @@ const CODING_TERMS: RegExp[] = [
   /\binpatient\b|\boutpatient\b/,
 ];
 
+/**
+ * Phrases where a healthcare/coding term is used in a non-healthcare sense. They are blanked out
+ * before context is counted: "CPT, OPT" is a student work-visa status, not the procedure code set;
+ * an "energy provider" is not a care provider; "patient, personable" describes a temperament.
+ */
+const FALSE_FRIENDS: RegExp[] = [
+  /\bcpt\s*(,|\/|or|and|&)\s*(or\s+)?(stem\s+)?opt\b/g,
+  /\b(stem\s+)?opt\s*(,|\/|or|and|&)\s*(or\s+)?cpt\b/g,
+  /\b(energy|data|market\s+data|internet|cloud|hosting|payments?|software|technology|tech|saas|platform|utility|utilities|electric(ity)?|gas|telecom(munications)?|wireless|broadband|logistics|shipping|content|staffing|financial|it)\s+(service\s+)?providers?\b/g,
+  /\b(be|being|remain|stay|very|extremely|calm|kind|friendly|empathetic)\s+(and\s+)?patient\b(?!\s+(care|access|accounts?|financial|services|registration|records?|intake|scheduling|billing|experience|portal|advocate|relations))/g,
+  /\bpatient\s*(,|and|&)\s*(personable|kind|friendly|empathetic|courteous|professional|calm|understanding|detail[\s-]oriented)\b/g,
+];
+
+function stripFalseFriends(text: string): string {
+  return FALSE_FRIENDS.reduce((t, re) => t.replace(re, ' '), text);
+}
+
 const STOPWORDS = new Set(['and', 'or', 'the', 'of', 'for', 'in', 'a', 'an', 'to', 'with']);
 
 function countHits(text: string, patterns: RegExp[]): number {
@@ -309,7 +326,7 @@ export function knownTerm(term: string): boolean {
  */
 export function classifyRelevance(input: RelevanceInput, terms: string[]): RelevanceResult {
   const title = normalizeForMatch(input.title);
-  const desc = normalizeForMatch([input.description ?? '', ...(input.tags ?? [])].join('\n')).slice(0, 12_000);
+  const desc = stripFalseFriends(normalizeForMatch([input.description ?? '', ...(input.tags ?? [])].join('\n')).slice(0, 12_000));
   const company = normalizeForMatch(input.company ?? '');
   const contextText = `${title}\n${company}\n${desc}`;
   const healthcare = countHits(contextText, HEALTHCARE_TERMS);

@@ -27,6 +27,7 @@ It can run as a **command-line tool** or as an **HTTP API**.
 | Source | Status | How |
 |---|---|---|
 | LinkedIn | ✅ working | public job-search pages |
+| JobRight | ✅ working | the site's own logged-out search API (remote, US, posted-within filters) |
 | CareerJet | ✅ working | official API |
 | Dice | ✅ working | public search pages |
 | RemoteOK | ✅ working | public JSON feed |
@@ -36,8 +37,12 @@ It can run as a **command-line tool** or as an **HTTP API**.
 | Jooble | 🔑 needs a free API key | official API. Set `JOOBLE_API_KEY` |
 | SimplyHired | ⛔ off by default | owned by Indeed. Opt in with `ALLOW_INDEED_NETWORK_SOURCES=true` |
 | ZipRecruiter, Glassdoor, Monster, CareerBuilder, Wellfound, Built In | 🚫 blocked | bot protection (Cloudflare / DataDome). Reachability check only |
+| FlexJobs | 🚫 blocked | Akamai "Access Denied" (HTTP 403) on every page; paid-membership site. Reachability check only |
+| Indeed | 🚫 excluded | excluded by design, and Cloudflare-protected (HTTP 403). Listed for its reachability check only; it never runs and `--sources indeed` is refused |
 
 Run `npm run cli -- probe` to see which sources are reachable right now.
+
+Blocked sources are never scraped. Solving or getting around CAPTCHAs and bot checks is out of scope. Each blocked source makes one request when probed, to report its current status.
 
 ---
 
@@ -129,7 +134,9 @@ Without `--output`, the CSV is printed to the terminal.
 | `--no-persist` | Don't save to the SQLite database | saves |
 | `--log-level <level>` | `debug`, `info`, `warn`, `error` | `info` |
 
-Source ids: `linkedin`, `dice`, `remoteok`, `remotive`, `jobicy`, `careerjet`, `jooble`, `canada_job_bank`, `simplyhired`.
+Source ids: `linkedin`, `jobright`, `dice`, `remoteok`, `remotive`, `jobicy`, `careerjet`, `jooble`, `canada_job_bank`, `simplyhired`.
+
+Probe-only ids (for `npm run cli -- probe <id>`): `ziprecruiter`, `glassdoor`, `careerbuilder`, `monster`, `wellfound`, `builtin`, `flexjobs`, `indeed`.
 
 ### Other commands
 
@@ -289,7 +296,8 @@ tests/                   unit and integration tests
 ## Notes and limitations
 
 - Results depend on what each site shows publicly at that moment. Sites change their pages over time, and a parser may need updating when they do. `npm run cli -- probe` shows which sources are healthy.
-- Most results come from LinkedIn and CareerJet. RemoteOK, Remotive and Jobicy list few medical jobs.
+- Most results come from LinkedIn, JobRight and CareerJet. RemoteOK, Remotive and Jobicy list few medical jobs.
+- JobRight matches job titles narrowly, so some titles return only a few jobs. Its descriptions are JobRight's own AI summaries (summary, responsibilities, requirements), not the original posting. The employer's apply link is shown only to logged-in users, so the `job_url` column links to the JobRight job page. Many JobRight listings are copies of LinkedIn jobs; these are merged into one row. Because JobRight hides where the application goes, the Indeed check cannot see Indeed-routed applications for JobRight listings.
 - Several large job boards block automated access and are not scraped.
 - LinkedIn often shows the employer's city as the location, even for remote jobs. The remote check reads the full job description, but open a few listings to confirm.
 - Use this tool responsibly and respect each site's terms of service. It rate-limits itself, but don't lower the delays aggressively.

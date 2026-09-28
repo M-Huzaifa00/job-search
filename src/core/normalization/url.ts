@@ -220,7 +220,7 @@ export function detectAts(url: string | null | undefined): AtsInfo | null {
   return null;
 }
 
-const JOB_BOARD_HOSTS = /(^|\.)(linkedin\.com|dice\.com|remoteok\.com|remotive\.com|jobicy\.com|jooble\.org|careerjet\.[a-z.]+|jobviewtrack\.com|jobbank\.gc\.ca|simplyhired\.com|ziprecruiter\.com|glassdoor\.[a-z.]+|monster\.com|careerbuilder\.com|builtin\.com|wellfound\.com|talent\.com|lensa\.com|jobgether\.com|adzuna\.[a-z.]+)$/i;
+const JOB_BOARD_HOSTS = /(^|\.)(linkedin\.com|dice\.com|remoteok\.com|remotive\.com|jobicy\.com|jooble\.org|careerjet\.[a-z.]+|jobviewtrack\.com|jobbank\.gc\.ca|simplyhired\.com|ziprecruiter\.com|glassdoor\.[a-z.]+|monster\.com|careerbuilder\.com|builtin\.com|wellfound\.com|jobright\.ai|flexjobs\.com|talent\.com|lensa\.com|jobgether\.com|adzuna\.[a-z.]+)$/i;
 
 export function isJobBoardUrl(url: string | null | undefined): boolean {
   const u = tryParseUrl(url);

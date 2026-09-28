@@ -57,6 +57,9 @@ export function detectBlockPage(status: number, headers: Headers, body: string):
   if (/challenges\.cloudflare\.com\/turnstile|turnstileLoad\s*=/i.test(head)) return 'Cloudflare Turnstile challenge';
   if (/px-captcha|perimeterx/i.test(head) && status >= 400) return 'PerimeterX CAPTCHA';
   if (/<title>\s*Security \| Glassdoor\s*<\/title>/i.test(head)) return 'Glassdoor security check';
+  if (/<title[^>]*>\s*Security Check - Indeed\.com\s*<\/title>/i.test(head)) return 'Indeed security check';
+  if (/<title[^>]*>\s*Security check \| Jobright\s*<\/title>/i.test(head)) return 'JobRight security check';
+  if (/<title>\s*Access Denied\s*<\/title>/i.test(head) && /edgesuite(\.|&#46;)net/i.test(head)) return 'Akamai edge block (Access Denied)';
   if (status === 999) return 'Request denied by anti-bot system (HTTP 999)';
   return null;
 }

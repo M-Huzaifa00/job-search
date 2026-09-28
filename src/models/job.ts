@@ -13,7 +13,10 @@ export const SOURCE_IDS = [
   'jooble',
   'canada_job_bank',
   'careerjet',
+  'jobright',
   'builtin',
+  'flexjobs',
+  'indeed',
 ] as const;
 
 export type SourceId = (typeof SOURCE_IDS)[number];

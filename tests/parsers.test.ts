@@ -4,6 +4,7 @@ import { parseJobBankFeed } from '../src/sources/canadaJobBank/parse.ts';
 import { parseCareerjet } from '../src/sources/careerjet/parse.ts';
 import { parseDiceSearch } from '../src/sources/dice/parse.ts';
 import { parseJobicy } from '../src/sources/jobicy/parse.ts';
+import { jobRightItemToRaw, parseJobRightSearch, parsePublishTime } from '../src/sources/jobright/parse.ts';
 import { parseJooble } from '../src/sources/jooble/parse.ts';
 import { parseLinkedInDetail, parseLinkedInSearch } from '../src/sources/linkedin/parse.ts';
 import { parseRemoteOk } from '../src/sources/remoteok/parse.ts';
@@ -196,6 +197,58 @@ describe('API/feed parsers', () => {
     assert.equal(j.company, 'Spectrum Health Care');
     assert.equal(j.salaryRaw, '$22.26 to $23.56 hourly');
     assert.equal(j.countryHint, 'CA');
+  });
+
+  it('JobRight visitor search: UTC publish time, remote hints, stitched summary', () => {
+    // Trimmed from a live POST /swan/recommend/visitor-search response.
+    const { items, total } = parseJobRightSearch({
+      success: true,
+      result: {
+        jobNum: 15,
+        jobList: [
+          {
+            jobResult: {
+              jobId: '6ababdc81acb8fc6f09c1425',
+              jobTitle: 'Credentialing and Enrollments Specialist',
+              jobSeniority: 'Mid Level',
+              jobLocation: 'United States',
+              isRemote: true,
+              workModel: 'Remote',
+              publishTime: '2026-09-28 13:19:36',
+              publishTimeDesc: '2 hours ago',
+              salaryDesc: '$27/hr - $34/hr',
+              employmentType: 'Full-time',
+              jobSummary: 'Modena Allergy + Asthma is a physician-led medical practice.',
+              coreResponsibilities: ['Prepare, submit, and manage provider credentialing and payer enrollment applications'],
+              requirements: ['Working knowledge of CAQH, PECOS, NPPES'],
+              url: 'https://jobright.ai/jobs/info/6ababdc81acb8fc6f09c1425?utm_source=1014',
+            },
+            companyResult: { companyName: 'Modena Allergy + Asthma', companyURL: 'https://www.allergistsandiego.com/', companyCategories: 'Hospital & Health Care' },
+          },
+          { jobResult: { jobId: '' } },
+        ],
+      },
+    });
+    assert.equal(total, 15);
+    assert.equal(items.length, 1);
+    const j = jobRightItemToRaw(items[0], { ...CTX, remoteFiltered: true });
+    assert.equal(j.postedAt, '2026-09-28T13:19:36Z');
+    assert.equal(j.jobUrl, 'https://jobright.ai/jobs/info/6ababdc81acb8fc6f09c1425');
+    assert.equal(j.company, 'Modena Allergy + Asthma');
+    assert.equal(j.companyUrl, 'https://www.allergistsandiego.com/');
+    assert.equal(j.countryHint, 'US');
+    assert.deepEqual(
+      j.remoteHints.map((h) => h.kind),
+      ['structured_remote', 'source_remote_filter'],
+    );
+    assert.match(j.descriptionText!, /physician-led[\s\S]*Responsibilities:\n- Prepare[\s\S]*Requirements:\n- Working knowledge of CAQH/);
+    assert.equal(parsePublishTime('not a date'), null);
+  });
+
+  it('JobRight hybrid work model becomes a structured hybrid hint', () => {
+    const { items } = parseJobRightSearch({ success: true, result: { jobList: [{ jobResult: { jobId: 'x1', jobTitle: 'Medical Coder', workModel: 'Hybrid', isRemote: false } }] } });
+    const j = jobRightItemToRaw(items[0], { ...CTX, remoteFiltered: false });
+    assert.deepEqual(j.remoteHints, [{ kind: 'structured_hybrid', detail: 'JobRight: Hybrid' }]);
   });
 
   it('SimplyHired __NEXT_DATA__ and Indeed Apply flag', () => {

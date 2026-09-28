@@ -1,10 +1,11 @@
 import type { AppConfig } from '../config/env.ts';
 import { SOURCE_IDS, type SourceId } from '../models/job.ts';
-import { builtin, careerbuilder, glassdoor, monster, wellfound, ziprecruiter } from './blocked.ts';
+import { builtin, careerbuilder, flexjobs, glassdoor, indeed, monster, wellfound, ziprecruiter } from './blocked.ts';
 import { canadaJobBank } from './canadaJobBank/index.ts';
 import { careerjet } from './careerjet/index.ts';
 import { dice } from './dice/index.ts';
 import { jobicy } from './jobicy/index.ts';
+import { jobright } from './jobright/index.ts';
 import { jooble } from './jooble/index.ts';
 import { linkedin } from './linkedin/index.ts';
 import { remoteok } from './remoteok/index.ts';
@@ -27,7 +28,10 @@ export const ADAPTERS: Record<SourceId, SourceAdapter> = {
   jooble,
   canada_job_bank: canadaJobBank,
   careerjet,
+  jobright,
   builtin,
+  flexjobs,
+  indeed,
 };
 
 export function getAdapter(id: SourceId): SourceAdapter {

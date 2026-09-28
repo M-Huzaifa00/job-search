@@ -56,17 +56,29 @@ describe('HTTP API', () => {
     assert.deepEqual(res.json(), { status: 'ok' });
   });
 
-  it('GET /api/sources lists all 15 sources with status and method', async () => {
+  it('GET /api/sources lists all 18 sources with status and method', async () => {
     const res = await app.inject({ method: 'GET', url: '/api/sources' });
     const body = res.json() as { id: string; status: string; method: string; enabled: boolean }[];
-    assert.equal(body.length, 15);
+    assert.equal(body.length, 18);
     const byId = Object.fromEntries(body.map((s) => [s.id, s]));
     assert.equal(byId.linkedin.status, 'working');
+    assert.equal(byId.jobright.status, 'working');
+    assert.equal(byId.jobright.enabled, true);
     assert.equal(byId.remoteok.method, 'api');
     assert.equal(byId.glassdoor.status, 'blocked');
     assert.equal(byId.glassdoor.enabled, false);
+    assert.equal(byId.flexjobs.status, 'blocked');
     assert.equal(byId.simplyhired.enabled, false);
-    assert.ok(!body.some((s) => /indeed/i.test(s.id)));
+    // Indeed is listed so its status is visible, but it is probe-only and never runs.
+    assert.equal(byId.indeed.status, 'blocked');
+    assert.equal(byId.indeed.method, 'probe-only');
+    assert.equal(byId.indeed.enabled, false);
+  });
+
+  it('POST /api/jobs/search refuses Indeed as a source', async () => {
+    const res = await app.inject({ method: 'POST', url: '/api/jobs/search', payload: { sources: ['indeed'] } });
+    assert.equal(res.statusCode, 400);
+    assert.match(JSON.stringify(res.json()), /Indeed is excluded/);
   });
 
   it('POST /api/jobs/search validates input and never exposes stack traces', async () => {

@@ -109,6 +109,26 @@ export const wellfound = blockedSource({
   probeUrl: 'https://wellfound.com/role/r/medical-billing',
 });
 
+export const flexjobs = blockedSource({
+  id: 'flexjobs',
+  name: 'FlexJobs',
+  homepage: 'https://www.flexjobs.com',
+  attempted: 'HTTP GET of the public search (/search?search=...) and remote category pages (/remote-jobs/...)',
+  observed: 'Akamai edge block ("Access Denied", HTTP 403, errors.edgesuite.net reference) on every page',
+  requirement: 'FlexJobs is a paid-membership board with no public API (employer names and apply links are members-only); a partner feed would be required.',
+  probeUrl: 'https://www.flexjobs.com/search?search=medical+billing',
+});
+
+export const indeed = blockedSource({
+  id: 'indeed',
+  name: 'Indeed',
+  homepage: 'https://www.indeed.com',
+  attempted: 'HTTP GET of the public search (/jobs?q=...&l=Remote) and the retired RSS feed (rss.indeed.com)',
+  observed: 'Cloudflare "Security Check - Indeed.com" page (HTTP 403); the RSS feed returns 404. Indeed is also excluded from this aggregator by design',
+  requirement: 'Excluded by policy. Indeed offers no public job-search API; only its partner/publisher programs provide feeds.',
+  probeUrl: 'https://www.indeed.com/jobs?q=medical+billing&l=Remote',
+});
+
 export const builtin = blockedSource({
   id: 'builtin',
   name: 'Built In',
