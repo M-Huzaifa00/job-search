@@ -25,7 +25,6 @@ describe('keyword matching', () => {
     assert.equal(rel('Reimbursement Specialist', HEALTH_DESC).relevant, true);
     assert.equal(rel('Patient Collections Representative', HEALTH_DESC).relevant, true);
     assert.equal(rel('EHR Support Specialist').relevant, true);
-    assert.equal(rel('Epic Application Analyst', 'Support clinicians using Epic EHR.').relevant, true);
   });
 
   it('matches administrative titles through the description', () => {
@@ -62,6 +61,54 @@ describe('loose-match false positives are rejected', () => {
       assert.equal(r.relevant, false, `matched ${r.matched_keywords.join(', ')}`);
     });
   }
+});
+
+describe('IT / health-IT titles are not medical billing jobs', () => {
+  // All were accepted from a live run before EXCLUDE_IT existed.
+  const EPIC_DESC = `Build and support Epic Resolute HB/PB for hospital billing. ${HEALTH_DESC} Revenue cycle and medical billing workflows.`;
+  const titles = [
+    'Epic Application Analyst',
+    'Epic Tapestry Configuration Analyst',
+    'Epic Certified Lead Analyst, Resolute PB',
+    'EPIC (Certified Resolute HB, Resolute PB Claims Analyst)',
+    'Lead Epic Professional Billing Analyst',
+    'Epic Hospital Billing Consultant',
+    'Epic Revenue Cycle Manager',
+    'Epic Interoperability Consultant',
+    'Senior IT Systems Analyst - Epic Hospital Billing Administration / HB Admin',
+    'Applications Support Analyst - Professional Billing',
+    'Application Analyst, Revenue Cycle, Full Time, First Shift',
+    'Senior Consultant - Meditech Analyst - Revenue Cycle',
+    'Revenue Cycle Federal Technical Director',
+    'IT Support Specialist Full Time',
+    'IT-Business Systems Analyst (ERX build)',
+    'Senior Application Analyst',
+    'Clinical Systems Analyst - FCS',
+    'Clinical Informatics Systems Analyst I - Epic Analyst - Cupid/Cardiology',
+    'Clinical Service Desk Support - Remote (CA)',
+    'System Specialist - Patient Access',
+    'Senior EHR Support Analyst',
+    'EMR Analyst II **Optime and Anesthesia** Remote',
+    'Electronic Health Records Analyst',
+    'eClinicalWorks (eCW) System Analyst',
+  ];
+  for (const title of titles) {
+    it(`"${title}" is not relevant`, () => {
+      const r = rel(title, EPIC_DESC);
+      assert.equal(r.relevant, false, `matched ${r.matched_keywords.join(', ')}`);
+      assert.equal(titleLooksRelevant(title, DEFAULT_TITLES), false);
+    });
+  }
+
+  it('billing titles that mention systems, analysts or an EHR are still relevant', () => {
+    assert.equal(rel('Revenue Cycle Analyst').relevant, true);
+    assert.equal(rel('Senior Revenue Cycle Analyst Underpayments').relevant, true);
+    assert.equal(rel('Credentialing & Enrollment Analyst I', HEALTH_DESC).relevant, true);
+    assert.equal(rel('System Coding Manager', CODING_DESC).relevant, true);
+    assert.equal(rel('REMOTE Revenue Cycle Manager (FQHC & Athena exp. req. $70-80K)').relevant, true);
+    assert.equal(rel('Medical Coder and Biller MUST HAVE ECW EMR experience', CODING_DESC).relevant, true);
+    assert.equal(rel('Support Specialist Lead (EHR platform billing support)', HEALTH_DESC).relevant, true);
+  });
 });
 
 describe('non-healthcare senses of healthcare words do not count as context', () => {

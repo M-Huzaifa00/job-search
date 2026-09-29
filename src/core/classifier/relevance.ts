@@ -192,16 +192,31 @@ const TERM_RULES: Record<string, TermRule> = {
   },
   'ehr support specialist': {
     category: 'EHR Support',
-    strong: [new RegExp(String.raw`\b${EHR_SYSTEMS}\s+(\w+\s+){0,2}(support|specialist|analyst|trainer|technician|coordinator|help\s*desk|administrator|consultant|implementation)\b`)],
-    contextual: [/\b(clinical\s+applications?|applications?|help\s*desk|service\s+desk|technical|it|systems?)\s+(support|analyst|specialist)\b/],
-    contextualNeedsDesc: new RegExp(String.raw`\b${EHR_SYSTEMS}\b`),
-    minContext: 1,
+    // Non-technical EHR roles only; EHR build/application analysts are IT jobs (see EXCLUDE_IT).
+    strong: [new RegExp(String.raw`\b${EHR_SYSTEMS}\s+(\w+\s+){0,2}(support|specialist|trainer|technician|coordinator|clerk|assistant|associate)\b`)],
     allowSoftware: true,
   },
 };
 
 const EXCLUDE_ENGINEERING =
   /\b(developer|engineer|engineering|programmer|devops|sre|full[\s-]?stack|front[\s-]?end|back[\s-]?end|data\s+scientist|machine\s+learning|ml\s+engineer|ai\s+engineer|architect|sdet|qa\s+automation)\b/;
+/**
+ * IT / health-IT titles. EHR build analysts and application-support roles borrow billing vocabulary
+ * ("Epic Resolute PB Analyst", "Application Analyst, Revenue Cycle") but are technical jobs.
+ */
+const EXCLUDE_IT = new RegExp(
+  [
+    String.raw`\bit\b`,
+    String.raw`\binformation\s+(technology|systems)\b`,
+    String.raw`\b(help|service)\s*desk\b`,
+    String.raw`\b(informatics|interoperability|configuration|cybersecurity)\b`,
+    String.raw`\b(technical|desktop)\s+(support|director|architect|lead)\b`,
+    // "Cash application" is payment posting, not software.
+    String.raw`\b(?<!cash\s)(applications?|apps|systems?|integration|interfaces?|infrastructure)\s+(analyst|specialist|support|administrator|consultant|architect|trainer)\b`,
+    String.raw`\b(epic|cerner|oracle\s+health|meditech|allscripts)\b.*\b(analyst|consultant|certified|certification|build(er)?|administrator|implementation|architect|manager|director|lead|support|trainer)\b`,
+    String.raw`\b(ehr|emr|electronic\s+(health|medical)\s+records?)\b.*\b(analyst|consultant|build(er)?|administrator|implementation|architect)\b`,
+  ].join('|'),
+);
 const EXCLUDE_SOFTWARE = /\bsoftware\b/;
 const EXCLUDE_PROGRAMMING = /\b(python|java|javascript|typescript|golang|ruby|php|c\+\+|c#|\.net|react|node\.?js|kotlin|swift|scala|rust|sql\s+developer)\b/;
 const EXCLUDE_TEACHING = /\b(instructor|teacher|tutor|professor|faculty|curriculum|bootcamp|lecturer)\b/;
@@ -336,6 +351,7 @@ export function classifyRelevance(input: RelevanceInput, terms: string[]): Relev
   let excludedReason: string | null = null;
 
   const engineering = EXCLUDE_ENGINEERING.test(title) || EXCLUDE_PROGRAMMING.test(title);
+  const infoTech = EXCLUDE_IT.test(title);
   const teaching = EXCLUDE_TEACHING.test(title);
   const sales = EXCLUDE_SALES.test(title);
   const software = EXCLUDE_SOFTWARE.test(title);
@@ -350,9 +366,13 @@ export function classifyRelevance(input: RelevanceInput, terms: string[]): Relev
       continue;
     }
 
-    // Hard exclusions: software/programming, teaching and sales roles never match medical terms.
+    // Hard exclusions: software/IT, teaching and sales roles never match medical terms.
     if (engineering) {
       excludedReason = 'software/engineering title';
+      continue;
+    }
+    if (infoTech) {
+      excludedReason = 'IT/health-IT title';
       continue;
     }
     if (software && !rule.allowSoftware) {
@@ -414,7 +434,7 @@ export function classifyRelevance(input: RelevanceInput, terms: string[]): Relev
 /** Cheap title-only pre-screen used before spending a request on a detail page. */
 export function titleLooksRelevant(title: string, terms: string[]): boolean {
   const t = normalizeForMatch(title);
-  if (EXCLUDE_ENGINEERING.test(t) || EXCLUDE_PROGRAMMING.test(t) || EXCLUDE_TEACHING.test(t) || EXCLUDE_SALES.test(t)) return false;
+  if (EXCLUDE_ENGINEERING.test(t) || EXCLUDE_PROGRAMMING.test(t) || EXCLUDE_IT.test(t) || EXCLUDE_TEACHING.test(t) || EXCLUDE_SALES.test(t)) return false;
   if (ADMIN_FAMILY.test(t)) return true;
   for (const term of terms) {
     const rule = TERM_RULES[normTerm(term)];

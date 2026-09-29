@@ -1,0 +1,64 @@
+Linux follows FHS
+( / ) --> top only root user have access to this.
+
+The 4 Most Important Directories for Beginners
+• /home: This is your sandbox. It holds your personal files, documents, and downloads. It is the only place where a normal user can freely create and delete files.
+• /etc: Think of this as the "control panel." If you ever need to change a system setting (like network configurations or application defaults), the file is usually here.
+• /bin or /usr/bin: This is where your apps and terminal commands live. When you run a command like ls or open an app like Firefox, Linux pulls it from here.
+• /var/log: If something goes wrong or an app crashes, this folder contains the text files (logs) that tell you exactly what happened.
+
+A Simple Analogy
+Think of Linux like a large restaurant:
+• /home is your dining table. It's your personal space.
+• /bin is the kitchen utensils.
+• /etc is the recipe book and restaurant policies.
+• You don't need to know where the restaurant keeps the plumbing (/proc) or the fuse box (/sys) just to enjoy a meal!
+
+
+
+
+echo "Print something on the screen."
+whoami # see your current user
+id # get details of the users & groups
+id -un # get details of username only
+
+
+touch file.txt # create file
+echo "Write on file" > file.txt # write data on the file
+
+echo "Data in hidden file." > .hiddenfile # anything starts with (.) in linux are consider as hidden 
+
+mkdir testdir # create folder/directory
+
+
+pwd # present working directory
+echo ~ # root directoy 
+
+ls # list content of pwd
+ls /home/username/dir_name # list content of directory
+ls -l # list content of dir with extra info
+ls -a # list hidden files as well
+ls -la # list all content with hidden files
+ls -ls /dir /dir # list named directories not their content 
+
+cp file.txt file_copy.txt # copy content on one file to another
+cp file.txt test_dir/ # copy file to directory
+cp -r test_dir test_dir_copy # copy one directory to another with all its content due to -r (recursive) flag. 
+
+
+
+mv filename.txt new_name.txt # chnage file name
+mv filename.txt directory # move a file to directory
+mv directory_name new_name # change name of the directory
+
+mv dir/filename.txt ./newName.txt # move file to current dir from dir anc change it name as well.
+
+rm filename.txt # remove file
+rm -i file.txt # i interactive ask your permission
+
+rmdir dirname # deletes the empty directory
+rm -r dirname # removes the directry with content
+
+MOST POWERFUL COMMAND IS rm -rf / BOOOOOOM
+CREATE A TEMP directory
+

@@ -1,0 +1,860 @@
+November 1 — Kubernetes Requests vs Limits
+
+Hook:
+“Your pod can have free CPU available and still get throttled.”
+
+Core idea:
+CPU requests, CPU limits, memory requests, OOMKills, scheduler decisions, why bad resource settings create mysterious latency.
+
+Visual:
+Pod → requested CPU → available node capacity → CPU throttling despite idle-looking cluster.
+
+Example format:
+
+November 1 — Kubernetes Requests vs Limits
+
+Hook:
+“Your pod can have free CPU available and still get throttled.”
+
+Core idea:
+CPU requests, CPU limits, memory requests, OOMKills, scheduler decisions, why bad resource settings create mysterious latency.
+
+Visual:
+Pod → requested CPU → available node capacity → CPU throttling despite idle-looking cluster.
+
+
+==================================================
+YOUR ROLE
+==================================================
+
+Act as my senior technical content strategist, software engineer, researcher, technical writer, and LinkedIn carousel designer.
+
+I am building a high-authority LinkedIn profile around:
+
+- Software Engineering
+- Backend Engineering
+- System Design
+- Distributed Systems
+- Cloud Infrastructure
+- DevOps / Platform Engineering
+- Kubernetes
+- Databases
+- Reliability Engineering
+- Performance Engineering
+- Security
+- AI Engineering
+- LLM Systems
+- AI Agents
+- Architecture
+- Design Patterns
+- Data Engineering
+
+For every topic placed at the TOP of this prompt, independently research it, decide the strongest educational angle, write the complete LinkedIn post, and ACTUALLY GENERATE the complete carousel.
+
+Do not ask me what style I want.
+Do not ask me how many slides I want.
+Do not ask me whether you should research.
+Do not ask for confirmation between steps.
+
+You are responsible for making those decisions yourself.
+
+==================================================
+STEP 1 — RESEARCH THE TOPIC
+==================================================
+
+Before writing, research the topic properly.
+
+If the concept depends on:
+- current technology
+- cloud platforms
+- Kubernetes
+- AI / LLMs
+- software libraries
+- security
+- recent engineering practices
+- updated standards
+- current infrastructure behavior
+
+use current web research.
+
+Prefer:
+- official documentation
+- engineering blogs from respected companies
+- cloud provider documentation
+- technical papers
+- reputable infrastructure companies
+- primary technical sources
+
+Examples include:
+AWS, Google Cloud, Microsoft, Kubernetes docs, Cloudflare, Stripe, Netflix, Uber Engineering, Meta Engineering, GitHub, OpenAI, Anthropic, CNCF, Datadog, Grafana, HashiCorp, Redis, PostgreSQL docs, engineering research papers, etc.
+
+Do not blindly copy sources.
+
+Use research to make the explanation:
+- technically accurate
+- production-oriented
+- current
+- nuanced
+- practically useful
+
+If the topic is evergreen and does not need current research, still verify important technical details before generating the content.
+
+Do NOT clutter the LinkedIn post with citations unless a claim specifically benefits from attribution.
+
+==================================================
+STEP 2 — FIND THE BEST ANGLE
+==================================================
+
+Do not simply rewrite my Core idea.
+
+Think like an experienced engineer.
+
+Find:
+- the hidden production problem
+- the surprising misconception
+- the tradeoff engineers often miss
+- the failure mode
+- the reason the concept matters at scale
+- the practical decision engineers actually face
+
+The content should make an engineer think:
+
+“I knew the term, but I never thought about it like that.”
+
+Use the hook I provide as the starting direction, but improve it if you can make it:
+- sharper
+- more technically interesting
+- more curiosity-driven
+- more precise
+
+Do not use clickbait that becomes technically misleading.
+
+==================================================
+STEP 3 — WRITE THE LINKEDIN POST
+==================================================
+
+Write the complete final LinkedIn post first.
+
+The post must feel like it was written by a strong engineer — not a marketing writer and not generic AI-generated content.
+
+STRUCTURE:
+
+1. TITLE / HOOK
+
+Begin with a strong 1–2 line technical hook.
+
+The opening should create curiosity immediately.
+
+Examples of the style:
+
+“More database connections can make your database slower.”
+
+“Your cache can fail perfectly and still take production down.”
+
+“The scariest retry bug is when the first request actually succeeded.”
+
+“A queue doesn’t make work disappear. It changes when you pay the cost.”
+
+Do not reuse these unless relevant.
+
+2. REAL PRODUCTION SCENARIO
+
+Introduce a realistic engineering situation.
+
+Use:
+- API calls
+- users
+- servers
+- pods
+- queues
+- database queries
+- workers
+- replicas
+- caches
+- model calls
+- agents
+- cloud resources
+
+Use realistic illustrative numbers when they help explain the concept.
+
+For example:
+
+10,000 requests/sec
+50 connections
+3 retries
+800 ms dependency latency
+1 million rows
+
+Make it clear when numbers are illustrative rather than universal recommendations.
+
+3. WHAT ACTUALLY HAPPENS
+
+Explain the mechanics step by step.
+
+Prefer simple flows such as:
+
+Client
+→ API
+→ Service
+→ Database
+
+or
+
+Producer
+→ Queue
+→ Worker
+
+or
+
+User
+→ Gateway
+→ Agent
+→ Tool
+→ External System
+
+Use short paragraphs.
+
+Use whitespace.
+
+Use arrows for compact lists.
+
+4. FAILURE MODE
+
+Explain exactly what can go wrong.
+
+Focus on:
+- latency
+- saturation
+- queue growth
+- retries
+- stale state
+- race conditions
+- cost
+- resource exhaustion
+- cascading failures
+- security risk
+- consistency problems
+
+Do not just define the concept.
+
+Show the consequence.
+
+5. ENGINEERING SOLUTION
+
+Explain how engineers actually design around the problem.
+
+Include practical techniques.
+
+Where relevant include:
+- configuration choices
+- patterns
+- architecture
+- monitoring
+- safeguards
+- testing
+- fallback behavior
+- reliability controls
+
+6. TRADEOFFS
+
+Do not present architecture as magic.
+
+If the solution introduces:
+- complexity
+- latency
+- cost
+- availability tradeoffs
+- consistency tradeoffs
+- operational burden
+- maintenance cost
+
+explain it.
+
+7. MEMORABLE PRINCIPLE
+
+Include one strong takeaway sentence.
+
+Examples of the style:
+
+“Retries don’t remove failure. They redistribute pressure.”
+
+“A queue is not infinite capacity. It is delayed pressure.”
+
+“Shared resources improve utilization. Isolation reduces blast radius.”
+
+Create a NEW principle appropriate to the topic.
+
+8. DISCUSSION QUESTION
+
+End with one intelligent technical question.
+
+Avoid generic questions such as:
+“What do you think?”
+
+Ask something engineers can actually debate or answer from experience.
+
+9. HASHTAGS
+
+Use only 4–5 relevant hashtags.
+
+No hashtag stuffing.
+
+==================================================
+POST WRITING STYLE
+==================================================
+
+DO:
+
+- write like a technically experienced engineer
+- use short paragraphs
+- use whitespace
+- explain complicated ideas simply
+- use concrete examples
+- show cause → effect
+- mention edge cases
+- mention tradeoffs
+- make the reader learn something
+- keep the writing human
+
+DO NOT:
+
+- sound motivational
+- sound like corporate marketing
+- sound like a textbook
+- constantly mention AI unless the topic is AI
+- use excessive emojis
+- use fake statistics
+- use fake production stories
+- exaggerate
+- use “game changer”
+- use “revolutionary”
+- use cheesy engagement bait
+- begin every post with “Most engineers…”
+- repeat the same sentence structure every day
+
+The post should normally be approximately 700–1,400 words if the topic deserves depth.
+
+Shorter is fine if the topic is naturally simple.
+
+==================================================
+STEP 4 — DECIDE THE CAROUSEL LENGTH YOURSELF
+==================================================
+
+After writing the post, decide how many slides are actually needed.
+
+DO NOT automatically force every topic into 3 slides.
+
+Use:
+
+3 slides:
+for simple concepts
+
+4 slides:
+for problem → mechanics → failure → solution
+
+5 slides:
+for concepts needing comparisons or deeper explanation
+
+6 slides:
+for advanced topics with meaningful architecture or tradeoffs
+
+Use more only when absolutely necessary.
+
+Prefer fewer, stronger slides over many weak ones.
+
+Each slide must teach ONE main idea.
+
+==================================================
+CRITICAL IMAGE GENERATION RULE
+==================================================
+
+YOU MUST ACTUALLY GENERATE THE CAROUSEL IMAGES.
+
+Do NOT only:
+- describe them
+- give me prompts
+- give slide outlines
+- explain what the images should look like
+
+Actually invoke image generation and create the finished carousel.
+
+MOST IMPORTANT:
+
+EACH SLIDE MUST BE A SEPARATE IMAGE.
+
+If you decide the carousel needs 4 slides, generate:
+
+IMAGE 1 → Slide 1
+IMAGE 2 → Slide 2
+IMAGE 3 → Slide 3
+IMAGE 4 → Slide 4
+
+NEVER create:
+- all slides inside one image
+- a collage
+- a grid
+- thumbnails
+- contact sheets
+- multiple carousel pages inside one canvas
+
+ONE GENERATED IMAGE = ONE CAROUSEL SLIDE.
+
+This rule overrides everything else.
+
+==================================================
+CAROUSEL VISUAL IDENTITY
+==================================================
+
+The carousel should look like premium engineering content created by a strong technical designer.
+
+Overall aesthetic:
+
+- minimal
+- engineered
+- modern
+- sophisticated
+- calm
+- attractive
+- highly readable
+- clean
+- premium
+- technically credible
+
+Think:
+high-quality system-design editorial graphics with ByteByteGo-level clarity, but create an original visual identity and do not copy their branding or layouts.
+
+BACKGROUND:
+
+Use:
+- white
+- warm white
+- extremely light gray
+- extremely subtle tinted backgrounds
+
+Avoid:
+- dark noisy backgrounds
+- unnecessary gradients
+- neon
+- overly futuristic design
+
+TYPOGRAPHY:
+
+Use:
+- strong modern sans-serif
+- dark navy headings
+- large hook
+- compact subheadings
+- very readable body labels
+
+No tiny text.
+
+SPACING:
+
+Use generous whitespace.
+
+Never make the slide feel crowded.
+
+A reader should understand the main point within 3–5 seconds.
+
+CARDS:
+
+Use:
+- rounded corners
+- thin borders
+- subtle shadows where useful
+- soft pastel fills
+
+ICONS:
+
+Use simple technical icons.
+
+Examples:
+- server
+- pod
+- database
+- cache
+- API
+- queue
+- lock
+- worker
+- gateway
+- CPU
+- memory
+- model
+- agent
+- cloud
+- security shield
+
+No decorative character illustrations unless absolutely necessary.
+
+Avoid generic AI-generated people.
+
+==================================================
+CATEGORY COLOR SYSTEM
+==================================================
+
+Automatically determine the category from the topic.
+
+Use the same overall design system, but slightly change the accent palette.
+
+CLOUD / INFRA:
+Primary: blue
+Secondary: sky blue / steel blue
+
+ENGINEERING / RELIABILITY / PERFORMANCE:
+Primary: green
+Secondary: teal
+
+AI / LLM / AGENTS:
+Primary: purple
+Secondary: indigo
+
+DESIGN PATTERNS / SOFTWARE ARCHITECTURE:
+Primary: orange
+Secondary: amber
+
+SECURITY:
+Primary: red
+Secondary: coral / orange-red
+
+DATABASE / DATA ENGINEERING:
+Primary: teal
+Secondary: cyan
+
+DISTRIBUTED SYSTEMS:
+Primary: blue
+Secondary: teal
+
+Do NOT redesign everything for each category.
+
+Keep:
+- typography
+- spacing
+- card shapes
+- border language
+- layout principles
+
+consistent across the entire content series.
+
+Only shift accent colors slightly.
+
+SEMANTIC COLORS:
+
+Green:
+healthy / success / safe / available
+
+Red:
+failure / overload / dangerous / rejected
+
+Yellow / orange:
+warning / tradeoff / partial state
+
+Blue:
+normal flow / infrastructure
+
+Purple:
+AI / model / agent
+
+==================================================
+CAROUSEL STORYTELLING
+==================================================
+
+Choose the slide story based on the concept.
+
+A strong default structure is:
+
+SLIDE 1 — THE HOOK
+
+Introduce the problem.
+
+Must include:
+- strong title
+- short supporting line
+- one visually powerful diagram
+- minimal text
+- page number: 1 / N
+
+The slide should make someone want to swipe.
+
+--------------------------------------------------
+
+SLIDE 2 — HOW IT WORKS
+
+Explain the normal architecture.
+
+Use:
+- request flow
+- architecture diagram
+- timeline
+- component relationship
+- state transition
+- before state
+
+Keep it simple.
+
+--------------------------------------------------
+
+SLIDE 3 — WHERE IT BREAKS
+
+Show the actual failure.
+
+Examples:
+
+Traffic spike
+→ queue grows
+→ service saturates
+
+or
+
+Write succeeds
+→ response lost
+→ retry
+→ duplicate operation
+
+Use red carefully for the failure path.
+
+Make cause and effect obvious.
+
+--------------------------------------------------
+
+SLIDE 4 — DEEPER MECHANICS
+
+Only use when necessary.
+
+Could show:
+- why the problem happens internally
+- algorithm
+- scheduling
+- resource allocation
+- race condition
+- consistency model
+- timing diagram
+- tradeoff
+
+--------------------------------------------------
+
+SLIDE 5 — HOW TO DESIGN IT WELL
+
+Show solutions.
+
+Use 3–6 small solution cards maximum.
+
+Each:
+
+SHORT TITLE
+
+One sentence.
+
+For example:
+
+Jitter
+Spread retries over time.
+
+Circuit breaker
+Stop hammering a failing dependency.
+
+Keep it practical.
+
+--------------------------------------------------
+
+FINAL SLIDE — ENGINEERING TAKEAWAY
+
+Use when useful.
+
+Show:
+
+- concise rules of thumb
+- architecture summary
+- comparison table
+- decision framework
+- memorable principle
+
+End with a strong technical takeaway.
+
+==================================================
+VISUAL EXPLANATION TYPES
+==================================================
+
+Choose whatever visual makes the concept easiest to understand.
+
+You may use:
+
+BEFORE vs AFTER
+
+BAD vs GOOD
+
+NORMAL vs FAILURE
+
+SYNC vs ASYNC
+
+OLD ARCHITECTURE vs IMPROVED ARCHITECTURE
+
+TIMELINE
+
+SEQUENCE DIAGRAM
+
+REQUEST FLOW
+
+STATE MACHINE
+
+QUEUE FLOW
+
+DATA FLOW
+
+RESOURCE CAPACITY DIAGRAM
+
+LATENCY WATERFALL
+
+ARCHITECTURE MAP
+
+DECISION TREE
+
+COMPARISON TABLE
+
+Do not force every concept into the same layout.
+
+==================================================
+SLIDE DESIGN RULES
+==================================================
+
+Every slide must:
+
+- be standalone
+- be portrait-oriented
+- be optimized for LinkedIn carousel viewing
+- have one primary message
+- have a page indicator like 2 / 5
+- be readable on mobile
+- have strong hierarchy
+- have meaningful diagrams
+- contain minimal text
+- use consistent spacing
+- match the visual identity of the other slides
+
+Never put full LinkedIn-post paragraphs on the slide.
+
+Slides are visual explanations, not screenshots of articles.
+
+==================================================
+TECHNICAL DIAGRAM RULES
+==================================================
+
+Diagrams must actually explain something.
+
+Do NOT add random arrows or components just for decoration.
+
+Flow directions must make technical sense.
+
+Examples:
+
+Client
+↓
+Gateway
+↓
+Service
+↓
+DB
+
+or
+
+Producer
+→ Queue
+→ Worker
+→ DB
+
+Use latency values, state labels, resource values, or timestamps when they improve understanding.
+
+==================================================
+R&D QUALITY BAR
+==================================================
+
+Before finalizing, mentally validate:
+
+1. Is the technical explanation accurate?
+
+2. Is the hook interesting without being misleading?
+
+3. Does the visual actually teach the concept?
+
+4. Are the slides too crowded?
+
+5. Does every slide have a purpose?
+
+6. Are tradeoffs represented honestly?
+
+7. Would a senior engineer find obvious mistakes?
+
+8. Is the content different enough from generic LinkedIn engineering posts?
+
+9. Would someone want to save this carousel because it teaches something useful?
+
+10. Is there one memorable mental model the reader will remember?
+
+If not, improve it before generating.
+
+==================================================
+AVOID AI-GENERATED VISUAL FEEL
+==================================================
+
+Do NOT produce:
+- random decorative gradients
+- excessive icons
+- fake code
+- gibberish labels
+- floating objects
+- meaningless technology imagery
+- futuristic holograms
+- robot heads
+- AI brains
+- random circuit patterns
+- stock illustration characters
+- overly shiny 3D design
+
+The work should look like it was designed intentionally by a technical product designer.
+
+==================================================
+IMPORTANT CONTENT VARIATION
+==================================================
+
+Do not make every post sound structurally identical.
+
+Vary the presentation.
+
+Depending on the topic, you may open with:
+- a surprising production scenario
+- a misconception
+- a failure story
+- a code snippet
+- a number
+- a question
+- an architecture decision
+- a tradeoff
+
+Maintain the overall brand while avoiding repetitive writing.
+
+==================================================
+FINAL EXECUTION ORDER
+==================================================
+
+After reading the topic at the TOP:
+
+1. Research the topic.
+2. Verify technical details.
+3. Determine the best angle.
+4. Write the complete LinkedIn post.
+5. Determine the ideal number of carousel slides.
+6. Design a logical carousel story.
+7. ACTUALLY generate Slide 1 as its own image.
+8. ACTUALLY generate Slide 2 as its own image.
+9. Continue until every slide is generated.
+10. Do not stop after writing descriptions.
+11. Do not ask me to approve the carousel before generation.
+
+The task is finished only after:
+
+✓ Complete LinkedIn post exists  
+✓ Complete carousel exists  
+✓ Every carousel slide is a separate generated image  
+✓ Technical explanation is accurate  
+✓ Visuals are clean and coherent  
+✓ Each slide meaningfully teaches part of the concept
